@@ -1,0 +1,35 @@
+protected void btnSaveSKUConfig_OnClick(object sender, EventArgs e)
+    {
+        //---save SKU components for a item Category into db        
+        dtSKUComponents = (DataTable)ViewState["dtSKUComponents"];
+
+        if (dtSKUComponents.Rows.Count > 0)
+        {
+            string strEntryUser = Session["User_Name"].ToString();
+            clsSKUConfig objSKUConfig = new clsSKUConfig();
+
+            DataTable execDt = objSKUConfig.saveSKUConfiguration(Convert.ToInt32(hfCategoryID.Value), strEntryUser, dtSKUComponents);
+            string strMsg = "";
+
+            if (execDt.Rows.Count > 0)
+            {
+                strMsg = execDt.Rows[0]["exec_msg"].ToString();
+            }
+            else
+            {
+                strMsg = "Undefined result!";
+            }
+
+            lblMsg.Text = strMsg;
+
+            modPopMsgBoxExt.Show();
+
+            clsControls();  
+        }
+        else
+        {
+            lblMsg.Text = "You need to add atleast 1 (one) component.";
+
+            modPopMsgBoxExt.Show();
+        }                  
+    }

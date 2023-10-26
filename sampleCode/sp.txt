@@ -1,0 +1,240 @@
+CREATE procedure [dbo].[SP_SKU_COMPONENTS_SAVE]
+(
+	@categoryId int,
+	@entryUser varchar(50),
+	@skuCompXML xml
+)
+as
+begin
+
+	declare @exec_flag int = 0
+	declare @exec_msg varchar(max) = ''
+
+	begin Tran
+
+	begin try
+
+		--creating a temp #table for holding sku components of a item category in xml format
+		CREATE TABLE #TB_SKU_COMPONENTS_TEMP
+		(	
+			ID_SKU_COMP bigint null, 
+			ID_CATEGORY int null, 
+			COMPONENT_NAME varchar(50) null, 
+			COMPONENT_LENGTH int null, 
+			COMPONENT_SEPARATOR varchar(1) null, 
+			SEQ_NO int null, 
+			COMPONENT_TYPE varchar(20) null, 
+			CONTROL_TYPE varchar(30) null,	
+			USE_AS_SEARCH_FILTER int null,
+			COMP_HAS_VALUE int null
+		)
+
+		--inserting category sku components from xml to #table
+		insert into #TB_SKU_COMPONENTS_TEMP
+		select
+			sku.comp.value('./id_sku_comp[1]','bigint'),  
+			@categoryId,
+			sku.comp.value('./name[1]','varchar(50)'),     
+			sku.comp.value('./length[1]','int'), 
+			sku.comp.value('./separator[1]','varchar(1)'), 				
+			sku.comp.value('./seq[1]','int'),
+			sku.comp.value('./component_type[1]','varchar(20)'),
+			sku.comp.value('./control_type[1]','varchar(30)'), 
+			sku.comp.value('./use_as_search_filter[1]','int'),
+			sku.comp.value('./comp_has_value[1]','int')				
+		from @skuCompXML.nodes ('sku/component') sku(comp)
+		
+
+
+		if exists (select ID_SKU_COMPONENT from TB_SKU_COMPONENTS where ID_CATEGORY = @categoryId) -- update
+		begin
+
+			--check if sku tagged with items
+			if ((select count(ID_CATEGORY) from TB_INVENTORYITEM where ID_CATEGORY = @categoryId) > 0) --sku tagged with items
+			begin
+								
+				set @exec_flag = 0 --cannot be updated
+				set @exec_msg = 'SKU Components cannot be updated as sku is already in use.'
+
+			end
+			else -- sku is not tagged with items
+			begin
+		
+				--delete sku components before re-inserting as update
+				/*delete from TB_SKU_COMPONENTS where ID_CATEGORY = @categoryId
+
+				insert into TB_SKU_COMPONENTS
+				(
+					ID_CATEGORY, 
+					SKU_COMPONENT_NAME, 
+					COMPONENT_LENGTH, 
+					SKU_COMPONENT_SEPARATOR, 
+					SEQ_NO, 
+					COMPONENT_TYPE, 
+					CONTROL_TYPE,	
+					USE_AS_SEARCH_FILTER,
+					ENTRY_USER,
+					ENTRY_DATE
+				)
+				select 
+					ID_CATEGORY, 
+					COMPONENT_NAME, 
+					COMPONENT_LENGTH, 
+					COMPONENT_SEPARATOR, 
+					SEQ_NO, 
+					COMPONENT_TYPE, 
+					CONTROL_TYPE,	
+					USE_AS_SEARCH_FILTER,
+					@entryUser,
+					getdate()
+				from 
+				#TB_SKU_COMPONENTS_TEMP*/
+
+				declare @id_sku_comp bigint 
+				declare @id_category int 
+				declare @component_name varchar(50) 
+				declare @component_length int
+				declare @component_separator varchar(1)
+				declare @seq_no int
+				declare @component_type varchar(20)  
+				declare @control_type varchar(30)	
+				declare @use_as_search_filter int
+				declare @comp_has_value int
+
+				declare cur_sku_comp_save cursor forward_only
+				for
+				select * from #TB_SKU_COMPONENTS_TEMP
+
+				open cur_sku_comp_save
+
+				fetch next from cur_sku_comp_save
+				into @id_sku_comp, @id_category, @component_name, @component_length, @component_separator, @seq_no, @component_type, @control_type, @use_as_search_filter, @comp_has_value
+
+
+				while (@@FETCH_STATUS = 0)
+				begin
+
+					if (isnull(@comp_has_value, 0) = 0) --sku component has no value entered yet 
+					begin
+
+						if exists (select ID_SKU_COMPONENT from TB_SKU_COMPONENTS where ID_SKU_COMPONENT = @id_sku_comp) --if sku comp already exists then update
+						begin
+
+							update TB_SKU_COMPONENTS
+							set
+							ID_CATEGORY = @id_category, 
+							SKU_COMPONENT_NAME = @component_name, 
+							COMPONENT_LENGTH = @component_length, 
+							SKU_COMPONENT_SEPARATOR = @component_separator, 
+							SEQ_NO = @seq_no, 
+							COMPONENT_TYPE = @component_type, 
+							CONTROL_TYPE = @control_type,	
+							USE_AS_SEARCH_FILTER = @use_as_search_filter
+							where ID_SKU_COMPONENT = @id_sku_comp
+
+						end
+						else --if sku comp does not exist then insert
+						begin
+
+							insert into TB_SKU_COMPONENTS
+							(
+								ID_CATEGORY, 
+								SKU_COMPONENT_NAME, 
+								COMPONENT_LENGTH, 
+								SKU_COMPONENT_SEPARATOR, 
+								SEQ_NO, 
+								COMPONENT_TYPE, 
+								CONTROL_TYPE,	
+								USE_AS_SEARCH_FILTER,								
+								ENTRY_USER,
+								ENTRY_DATE
+							)
+							select
+							@id_category, 
+							@component_name, 
+							@component_length, 
+							@component_separator, 
+							@seq_no, 
+							@component_type, 
+							@control_type, 
+							@use_as_search_filter, 							
+							@entryUser,
+							getdate()
+
+						end
+
+					end
+					/*else --sku component has value in sku value master -- skip
+					begin
+
+						-- do nothing
+
+					end*/
+
+					fetch next from cur_sku_comp_save
+					into @id_sku_comp, @id_category, @component_name, @component_length, @component_separator, @seq_no, @component_type, @control_type, @use_as_search_filter, @comp_has_value
+
+				end
+
+				close cur_sku_comp_save
+				deallocate cur_sku_comp_save
+
+
+				set @exec_flag = 1 --update success
+				set @exec_msg = 'SKU Components updated successfully.'
+
+			end
+
+		end
+		else -- insert
+		begin
+
+			insert into TB_SKU_COMPONENTS
+			(
+				ID_CATEGORY, 
+				SKU_COMPONENT_NAME, 
+				COMPONENT_LENGTH, 
+				SKU_COMPONENT_SEPARATOR, 
+				SEQ_NO, 
+				COMPONENT_TYPE, 
+				CONTROL_TYPE,	
+				USE_AS_SEARCH_FILTER,				
+				ENTRY_USER,
+				ENTRY_DATE
+			)
+			select 
+				ID_CATEGORY, 
+				COMPONENT_NAME, 
+				COMPONENT_LENGTH, 
+				COMPONENT_SEPARATOR, 
+				SEQ_NO, 
+				COMPONENT_TYPE, 
+				CONTROL_TYPE,	
+				USE_AS_SEARCH_FILTER,				
+				@entryUser,
+				getdate()
+			from 
+			#TB_SKU_COMPONENTS_TEMP
+
+			set @exec_flag = 1 --save success
+			set @exec_msg = 'SKU Components saved successfully.'
+
+		end
+		
+		commit Tran
+		
+		
+
+	end try
+	begin catch
+
+		rollback Tran
+
+		set @exec_flag = 0 -- failure
+		set @exec_msg = 'SKU Components could not be saved due to error. ' + (select error_message())
+
+	end catch
+
+	select @exec_flag as exec_flag, @exec_msg as exec_msg
+
+end

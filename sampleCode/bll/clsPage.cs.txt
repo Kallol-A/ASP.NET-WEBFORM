@@ -1,0 +1,48 @@
+public DataTable saveSKUConfiguration(int intItemCategoryId, string strEntryUser, DataTable dtSKUComp)
+        {            
+            StringBuilder xmlSKUComponents = new StringBuilder();
+            /*
+            <sku>
+                <component>
+                    <id_sku_comp></id_sku_comp>
+                    <seq></seq>
+                    <name></name>
+                    <length></length>
+                    <separator></separator>
+                    <component_type></component_type>
+                    <control_type></control_type>
+                    <use_as_search_filter></use_as_search_filter>
+                    <comp_has_value></comp_has_value>
+                </component>
+            </sku>
+            */
+
+            int intFilterYn = 0;
+            int intCompHasValueYn = 0;
+
+            xmlSKUComponents.Append("<sku>");
+
+            for (int i = 0; i < dtSKUComp.Rows.Count; i++)
+            {
+                intFilterYn = Convert.ToInt16(dtSKUComp.Rows[i]["USE_AS_SEARCH_FILTER"]);
+                intCompHasValueYn = Convert.ToInt16(dtSKUComp.Rows[i]["COMP_HAS_VALUE"].ToString() == "False" ? 0: 1);
+
+                xmlSKUComponents.Append("<component>");
+
+                xmlSKUComponents.Append("<id_sku_comp>" + dtSKUComp.Rows[i]["ID_SKU_COMPONENT"].ToString() + "</id_sku_comp>");
+                xmlSKUComponents.Append("<seq>" + dtSKUComp.Rows[i]["SEQ_NO"].ToString() + "</seq>");
+                xmlSKUComponents.Append("<name>" + dtSKUComp.Rows[i]["SKU_COMPONENT_NAME"].ToString() + "</name>");
+                xmlSKUComponents.Append("<length>" + dtSKUComp.Rows[i]["COMPONENT_LENGTH"].ToString() + "</length>");
+                xmlSKUComponents.Append("<separator>" + dtSKUComp.Rows[i]["SKU_COMPONENT_SEPARATOR"].ToString() + "</separator>");
+                xmlSKUComponents.Append("<component_type>" + dtSKUComp.Rows[i]["COMPONENT_TYPE"].ToString() + "</component_type>");
+                xmlSKUComponents.Append("<control_type>" + dtSKUComp.Rows[i]["CONTROL_TYPE"].ToString() + "</control_type>");
+                xmlSKUComponents.Append("<use_as_search_filter>" + intFilterYn.ToString() + "</use_as_search_filter>");
+                xmlSKUComponents.Append("<comp_has_value>" + intCompHasValueYn.ToString() + "</comp_has_value>");
+
+                xmlSKUComponents.Append("</component>");
+            }
+
+            xmlSKUComponents.Append("</sku>");
+
+            return clsSKUConfigData.saveSKUConfiguration(intItemCategoryId, strEntryUser, xmlSKUComponents.ToString());
+        }

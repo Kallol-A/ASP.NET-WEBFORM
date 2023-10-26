@@ -1,0 +1,42 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.34031.82
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "gridEditPopup", "gridEditPopup\", "{AAC15C74-F5B7-4F0B-92A8-3191C96FFA28}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.6.1"
+		Debug.AspNetCompiler.VirtualPath = "/localhost_63874"
+		Debug.AspNetCompiler.PhysicalPath = "gridEditPopup\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_63874\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/localhost_63874"
+		Release.AspNetCompiler.PhysicalPath = "gridEditPopup\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_63874\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "63874"
+		SlnRelativePath = "gridEditPopup\"
+		DefaultWebSiteLanguage = "Visual C#"
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AAC15C74-F5B7-4F0B-92A8-3191C96FFA28}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AAC15C74-F5B7-4F0B-92A8-3191C96FFA28}.Debug|Any CPU.Build.0 = Debug|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1ED1C97C-52DC-48BE-AC2E-C2A2A78F279C}
+	EndGlobalSection
+EndGlobal

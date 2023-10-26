@@ -1,0 +1,4 @@
+public static DataTable saveSKUConfiguration(int intItemCategoryId, string strEntryUser, string xmlSKUComponents)
+        {
+            return clsDBTask.ExecuteDataset(DBcommon.db_connection, "SP_SKU_COMPONENTS_SAVE", intItemCategoryId, strEntryUser, xmlSKUComponents).Tables[0];
+        }

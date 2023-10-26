@@ -1,0 +1,20 @@
+public class clsItemSKUInfo
+    {
+        public clsItemSKUInfo()
+        {
+            //----
+        }
+
+        public int id_item_batch_group { get; set; }
+        //public int id_category { get; set; }
+        public string batch_group_name { get; set; }
+        public int comp_mfg_date_yn { get; set; }
+        public int comp_exp_date_yn { get; set; }
+        public int comp_vendor_yn { get; set; }
+        public int comp_vendor_batch_no_yn { get; set; }
+        public int comp_mfg_plant_yn { get; set; }
+        public int comp_mfg_shift_yn { get; set; }
+        public int comp_mfg_lot_yn { get; set; }
+        public string comp_sequence { get; set; }
+        public int delete_yn { get; set; }
+    }
