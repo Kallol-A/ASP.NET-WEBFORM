@@ -133,8 +133,8 @@ public partial class InvoiceAdd : System.Web.UI.Page
         {
             // Get the updated values from the GridView
             string product_name = gridViewProducts.DataKeys[e.RowIndex]["product_name"].ToString();
-            string newRate = (gridViewProducts.Rows[e.RowIndex].FindControl("txtEditRate") as TextBox).Text;
             string newQuantity = (gridViewProducts.Rows[e.RowIndex].FindControl("txtEditQuantity") as TextBox).Text;
+            string newRate = (gridViewProducts.Rows[e.RowIndex].FindControl("txtEditRate") as TextBox).Text;
             string newDiscount = (gridViewProducts.Rows[e.RowIndex].FindControl("txtEditDiscount") as TextBox).Text;
             string newTax = (gridViewProducts.Rows[e.RowIndex].FindControl("txtEditTax") as TextBox).Text;
             string newAmount = (gridViewProducts.Rows[e.RowIndex].FindControl("txtEditAmount") as TextBox).Text;
@@ -145,8 +145,8 @@ public partial class InvoiceAdd : System.Web.UI.Page
             if (rowToUpdate != null)
             {
                 // Update the DataRow with the edited values
-                rowToUpdate["product_rate"] = newRate;
                 rowToUpdate["product_quantity"] = newQuantity;
+                rowToUpdate["product_rate"] = newRate;
                 rowToUpdate["product_discount"] = newDiscount;
                 rowToUpdate["product_tax"] = newTax;
                 rowToUpdate["product_amount"] = newAmount;

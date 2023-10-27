@@ -19,7 +19,8 @@
 
 </head>
 <body>
-    <form id="form1" runat="server">
+    <form id="frmInvoice" runat="server">
+        <asp:ScriptManager ID="ScriptManager1" EnablePageMethods="true" runat="server"></asp:ScriptManager>
         <div>
             <asp:MultiView ID="MultiView1" runat="server">
 
@@ -42,6 +43,7 @@
                                     <asp:Label ID="lblInvoiceNo" runat="server" Text="Invoice No." Font-Bold="True" Font-Size="Larger" ForeColor="Blue" CssClass="control-label"></asp:Label>
                                     <asp:Label ID="lblInvoiceNoReqd" runat="server" Text="*" Font-Bold="True" Font-Size="Larger" ForeColor="Red" CssClass="control-label"></asp:Label>
                                     <asp:TextBox ID="txtInvoiceNo" runat="server" CssClass="form-control" />
+                                    <asp:Label ID="lblInvoiceNoValid" runat="server" ForeColor="Red"></asp:Label>
                                 </div>
                             </div>
                         </div>
@@ -52,6 +54,7 @@
                                     <asp:Label ID="lblInvoiceDate" runat="server" Text="Date" Font-Bold="True" Font-Size="Larger" ForeColor="Blue" CssClass="control-label"></asp:Label>
                                     <asp:Label ID="lblInvoiceDateReqd" runat="server" Text="*" Font-Bold="True" Font-Size="Larger" ForeColor="Red" CssClass="control-label"></asp:Label>
                                     <asp:TextBox ID="txtInvoiceDate" runat="server" CssClass="form-control datepicker" />
+                                    <asp:Label ID="lblInvoiceDateValid" runat="server" ForeColor="Red"></asp:Label>
                                 </div>
                             </div>
                         </div>
@@ -62,10 +65,16 @@
                                     <asp:Label ID="lblInvoiceParty" runat="server" Text="Party Name" Font-Bold="True" Font-Size="Larger" ForeColor="Blue" CssClass="control-label"></asp:Label>
                                     <asp:Label ID="lblInvoicePartyReqd" runat="server" Text="*" Font-Bold="True" Font-Size="Larger" ForeColor="Red" CssClass="control-label"></asp:Label>
                                     <asp:TextBox ID="txtInvoiceParty" runat="server" CssClass="form-control" />
+                                    <asp:Label ID="lblInvoicePartyValid" runat="server" ForeColor="Red"></asp:Label>
                                 </div>
                             </div>
                         </div>
                         <h3>Invoice Detail</h3>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <asp:Label ID="lblErrorMessage" runat="server"></asp:Label>
+                            </div>
+                        </div>
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="form-group">
@@ -115,20 +124,20 @@
                                                 <%# Container.DataItemIndex + 1 %>
                                             </ItemTemplate>
                                         </asp:TemplateField>
-                                        <asp:BoundField DataField="product_name" HeaderText="Product Name" />
+                                        <asp:BoundField DataField="product_id" Visible="false" />
 
-<%--                                        <asp:TemplateField HeaderText="Product Name">
+                                        <asp:TemplateField HeaderText="Product Name">
                                             <ItemTemplate>
-                                                <asp:Label ID="lblProductName" runat="server" Text='<%# Eval("product_name") %>' />
+                                                <asp:Label ID="lblProductName" runat="server" Text='<%# Eval("product_name") %>' data-product_name='<%# Eval("product_name") %>' />
                                             </ItemTemplate>
                                             <EditItemTemplate>
                                                 <asp:TextBox ID="txtEditProductName" runat="server" Text='<%# Bind("product_name") %>' />
                                             </EditItemTemplate>
-                                        </asp:TemplateField>--%>
+                                        </asp:TemplateField>
 
                                         <asp:TemplateField HeaderText="Quantity">
                                             <ItemTemplate>
-                                                <asp:Label ID="lblQuantity" runat="server" CssClass="text-right" Text='<%# Eval("product_quantity") %>' />
+                                                <asp:Label ID="lblQuantity" runat="server" CssClass="text-right" Text='<%# Eval("product_quantity") %>' data-quantity='<%# Eval("product_quantity") %>' />
                                             </ItemTemplate>
                                             <EditItemTemplate>
                                                 <asp:TextBox ID="txtEditQuantity" runat="server" CssClass="text-right" AutoPostBack="true" Text='<%# Bind("product_quantity") %>' OnTextChanged="UpdateAmountTextBox"></asp:TextBox>
@@ -138,7 +147,7 @@
 
                                         <asp:TemplateField HeaderText="Rate (₹)">
                                             <ItemTemplate>
-                                                <asp:Label ID="lblRate" runat="server" Text='<%# Eval("product_rate") %>' />
+                                                <asp:Label ID="lblRate" runat="server" Text='<%# Eval("product_rate") %>' data-rate='<%# Eval("product_rate") %>' />
                                             </ItemTemplate>
                                             <EditItemTemplate>
                                                 <asp:TextBox ID="txtEditRate" runat="server" CssClass="text-right" AutoPostBack="true" Text='<%# Bind("product_rate") %>' OnTextChanged="UpdateAmountTextBox"></asp:TextBox>
@@ -148,7 +157,7 @@
 
                                         <asp:TemplateField HeaderText="Discount (₹)">
                                             <ItemTemplate>
-                                                <asp:Label ID="lblDiscount" runat="server" Text='<%# Eval("product_discount") %>' />
+                                                <asp:Label ID="lblDiscount" runat="server" Text='<%# Eval("product_discount") %>' data-discount='<%# Eval("product_discount") %>' />
                                             </ItemTemplate>
                                             <EditItemTemplate>
                                                 <asp:TextBox ID="txtEditDiscount" runat="server" CssClass="text-right" AutoPostBack="true" Text='<%# Bind("product_discount") %>' OnTextChanged="UpdateAmountTextBox"></asp:TextBox>
@@ -158,7 +167,7 @@
 
                                         <asp:TemplateField HeaderText="Tax (₹)">
                                             <ItemTemplate>
-                                                <asp:Label ID="lblTax" runat="server" Text='<%# Eval("product_tax") %>' />
+                                                <asp:Label ID="lblTax" runat="server" Text='<%# Eval("product_tax") %>' data-tax='<%# Eval("product_tax") %>' />
                                             </ItemTemplate>
                                             <EditItemTemplate>
                                                 <asp:TextBox ID="txtEditTax" runat="server" CssClass="text-right" AutoPostBack="true" Text='<%# Bind("product_tax") %>' OnTextChanged="UpdateAmountTextBox"></asp:TextBox>
@@ -168,7 +177,7 @@
 
                                         <asp:TemplateField HeaderText="Amount (₹)">
                                             <ItemTemplate>
-                                                <asp:Label ID="lblAmount" runat="server" Text='<%# Eval("product_amount") %>'></asp:Label>
+                                                <asp:Label ID="lblAmount" runat="server" Text='<%# Eval("product_amount") %>' data-amount='<%# Eval("product_amount") %>' />
                                             </ItemTemplate>
                                             <EditItemTemplate>
                                                 <asp:TextBox ID="txtEditAmount" runat="server" CssClass="text-right" Text='<%# Bind("product_amount") %>'></asp:TextBox>
@@ -179,7 +188,7 @@
                                         <asp:TemplateField HeaderText="Actions">
                                             <ItemTemplate>
                                                 <div style="text-align: center;">
-                                                    <button type="button" id="btnEdit" class="btn btn-lg" data-toggle="modal" data-target="#myModal">
+                                                    <button type="button" id="btnEdit" class="btn btn-lg">
                                                         <img src="assets/img/edit.png" height="30" width="30" alt="Edit" style="vertical-align: middle;" />
                                                     </button>
                                                     <asp:ImageButton ID="btnDelete" runat="server" ImageUrl="assets/img/delete.png" Height="30" Width="30" CommandName="Delete" OnClientClick="return confirm('Are you sure you want to delete this item?');" style="vertical-align: middle;" />
@@ -188,6 +197,7 @@
                                         </asp:TemplateField>
                                     </Columns>
                                 </asp:GridView>
+                                <asp:Label ID="lblGridViewValid" runat="server" ForeColor="Red"></asp:Label>
 
                                 <!-- Modal -->
                                     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -200,47 +210,46 @@
                                             </button>
                                           </div>
                                           <div class="modal-body">
-                                            <form>
 
                                               <div class="form-group">
-                                                <label for="recipient-name" class="col-form-label">Product Name:</label>
-                                                <input type="text" class="form-control" id="product-name" readonly="true"/>
+                                                <label for="product_name" class="col-form-label">Product Name:</label>
+                                                <asp:TextBox class="form-control" ID="product_name" runat="server" onkeypress="return false;" onkeydown="return preventDelete(event);" />
                                               </div>
 
                                               <div class="form-group">
-                                                <label for="recipient-name" class="col-form-label">Quantity:</label>
-                                                <input type="text" class="form-control" id="product-quantity" />
+                                                <label for="product_quantity" class="col-form-label">Quantity:</label>
+                                                <asp:TextBox class="form-control" ID="product_quantity" runat="server" />
                                               </div>
 
                                               <div class="form-group">
-                                                <label for="recipient-name" class="col-form-label">Rate:</label>
-                                                <input type="text" class="form-control" id="product-rate" />
+                                                <label for="product_rate" class="col-form-label">Rate:</label>
+                                                <asp:TextBox class="form-control" ID="product_rate" runat="server" />
                                               </div>
 
                                               <div class="form-group">
-                                                <label for="recipient-name" class="col-form-label">Discount:</label>
-                                                <input type="text" class="form-control" id="product-discount" />
+                                                <label for="product_discount" class="col-form-label">Discount:</label>
+                                                <asp:TextBox class="form-control" ID="product_discount" runat="server" />
                                               </div>
 
                                               <div class="form-group">
-                                                <label for="recipient-name" class="col-form-label">Tax:</label>
-                                                <input type="text" class="form-control" id="product-tax" />
+                                                <label for="product_tax" class="col-form-label">Tax:</label>
+                                                <asp:TextBox class="form-control" ID="product_tax" runat="server" />
                                               </div>
 
                                               <div class="form-group">
-                                                <label for="recipient-name" class="col-form-label">Amount:</label>
-                                                <input type="text" class="form-control" id="product-amount" />
+                                                <label for="product_amount" class="col-form-label">Amount:</label>
+                                                <asp:TextBox class="form-control" ID="product_amount" runat="server" onkeypress="return false;" onkeydown="return preventDelete(event);" />
                                               </div>
 
-                                            </form>
                                           </div>
                                           <div class="modal-footer">
                                             <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
-                                            <button type="button" class="btn btn-primary">Update</button>
+                                            <asp:Button ID="btnUpdate" class="btn btn-primary" runat="server" Text="Update" OnClick="btnUpdate_Click" />
                                           </div>
                                         </div>
                                       </div>
                                     </div>
+                                <!-- End Modal -->
 
                                 <div class="row">
                                     <div class="col-md-10 d-flex justify-content-end">
@@ -254,7 +263,7 @@
                                 </div>
                             </div>
                         </div>
-
+                        <asp:Label ID="lblTest" runat="server" Font-Size="Larger" ForeColor="Red" CssClass="control-label"></asp:Label>
                         <asp:Label ID="lblMandatoryMessage" runat="server" Text="All * marked fields are mandatory" Font-Size="Larger" ForeColor="Red" CssClass="control-label"></asp:Label>
                         <div class="row d-flex justify-content-end">
                             <div class="col-md-2"> <!-- Each button takes 1/4 of their container's width (3 columns out of 12) -->
@@ -337,6 +346,49 @@
                 showButtonPanel: true,  // Show a button panel with today and done buttons
             });
 
+            $("#btnSubmit").click(function () {
+                var invoiceNo = $("#<%= txtInvoiceNo.ClientID %>").val();
+                var invoiceDate = $("#<%= txtInvoiceDate.ClientID %>").val();
+                var invoiceParty = $("#<%= txtInvoiceParty.ClientID %>").val();
+
+                $("#<%= lblInvoiceNoValid.ClientID %>").text(!invoiceNo ? "Invoice No. cannot be blank!" : "");
+                $("#<%= lblInvoiceDateValid.ClientID %>").text(!invoiceDate ? "Invoice Date cannot be blank!" : "");
+                $("#<%= lblInvoicePartyValid.ClientID %>").text(!invoiceParty ? "Party Name cannot be blank!" : "");
+
+                var gridViewRows = $("#<%= gridViewProducts.ClientID %> tr").length - 1; // Subtract 1 for the header row
+                $("#<%= lblGridViewValid.ClientID %>").text(gridViewRows <= 0 ? "Please add at least one product in the invoice." : "");
+
+                if (!invoiceNo || !invoiceDate || !invoiceParty || gridViewRows <= 0) {
+                    return false; // Prevent form submission
+                }
+                return true;
+            });
+
+            // Capture the click event of the "Edit" button
+            $("#gridViewProducts").on("click", "#btnEdit", function () {
+                // Get the row containing the clicked button
+                var row = $(this).closest("tr");
+
+                // Retrieve data from the row and populate the modal fields
+                var productName = row.find('[data-product_name]').data('product_name');
+                var quantity = row.find('[data-quantity]').data('quantity');
+                var rate = row.find('[data-rate]').data('rate');
+                var discount = row.find('[data-discount]').data('discount');
+                var tax = row.find('[data-tax]').data('tax');
+                var amount = row.find('[data-amount]').data('amount');
+
+                // Populate the modal fields with the retrieved data
+                $("#product_name").val(productName);
+                $("#product_quantity").val(quantity);
+                $("#product_rate").val(rate);
+                $("#product_discount").val(discount);
+                $("#product_tax").val(tax);
+                $("#product_amount").val(amount);
+
+                // Show the modal
+                $('#myModal').modal('show');
+            });
+
             // Function to calculate the amount
             function calculateAmount() {
                 var rate = parseFloat($('#<%= txtProductRate.ClientID %>').val()) || 0;
@@ -380,6 +432,24 @@
             document.getElementById('<%= txtProductTax.ClientID %>').addEventListener('change', calculateAmount);
 
             document.getElementById('<%= btnAddRow.ClientID %>').addEventListener('click', calculateGrandTotal);
+
+            // Function to calculate and update product_amount using jQuery
+            function calculateModalProductAmount() {
+                var quantity = parseFloat($('#<%= product_quantity.ClientID %>').val());
+                var rate = parseFloat($('#<%= product_rate.ClientID %>').val());
+                var discount = parseFloat($('#<%= product_discount.ClientID %>').val());
+                var tax = parseFloat($('#<%= product_tax.ClientID %>').val());
+
+                var amount = quantity * rate - discount + tax;
+        
+                $('#<%= product_amount.ClientID %>').val(amount.toFixed(2)); // Format to 2 decimal places
+            }
+
+            // Attach the calculateProductAmount function to change events of relevant inputs using jQuery
+            $('#<%= product_quantity.ClientID %>').change(calculateModalProductAmount);
+            $('#<%= product_rate.ClientID %>').change(calculateModalProductAmount);
+            $('#<%= product_discount.ClientID %>').change(calculateModalProductAmount);
+            $('#<%= product_tax.ClientID %>').change(calculateModalProductAmount);
 
             // Initial calculation
             calculateAmount();

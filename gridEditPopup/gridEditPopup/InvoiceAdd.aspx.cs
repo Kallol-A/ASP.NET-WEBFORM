@@ -11,7 +11,13 @@ using System.Data.SqlClient;
 
 using App.Data;
 using App.Business;
+using System.Web.Services;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.Web.Script.Serialization;
+using System.Web.Script.Services;
 
+//[System.Web.Script.Services.ScriptService]
 public partial class InvoiceAdd : System.Web.UI.Page
 {
     protected void Page_Load(object sender, EventArgs e)
@@ -72,16 +78,64 @@ public partial class InvoiceAdd : System.Web.UI.Page
         MultiView1.ActiveViewIndex = 0;
     }
 
+    //protected void btnAddRow_Click(object sender, EventArgs e)
+    //{
+    //    // Retrieve the DataTable from ViewState
+    //    DataTable dt = ViewState["ProductData"] as DataTable;
+
+    //    // Add a new row
+    //    DataRow newRow = dt.NewRow();
+    //    newRow["product_name"] = txtProductName.Text;
+    //    newRow["product_quantity"] = txtProductQuantity.Text;
+    //    newRow["product_rate"] = txtProductRate.Text;
+    //    newRow["product_discount"] = txtProductDiscount.Text;
+    //    newRow["product_tax"] = txtProductTax.Text;
+    //    newRow["product_amount"] = txtAmount.Text;
+
+    //    dt.Rows.Add(newRow);
+
+    //    // Rebind the data to the GridView
+    //    gridViewProducts.DataSource = dt;
+    //    gridViewProducts.DataBind();
+
+    //    // Clear the textboxes for new input
+    //    txtProductName.Text = string.Empty;
+    //    txtProductQuantity.Text = string.Empty;
+    //    txtProductRate.Text = string.Empty;
+    //    txtProductDiscount.Text = string.Empty;
+    //    txtProductTax.Text = string.Empty;
+    //    txtAmount.Text = string.Empty;
+
+    //    // Calculate the Grand Total after adding a row
+    //    ClientScript.RegisterStartupScript(this.GetType(), "calculateGrandTotal", "calculateGrandTotal();", true);
+    //}
+
     protected void btnAddRow_Click(object sender, EventArgs e)
     {
         // Retrieve the DataTable from ViewState
         DataTable dt = ViewState["ProductData"] as DataTable;
 
+        // Check if the product name already exists in the DataTable
+        string productName = txtProductName.Text;
+
+        if (IsProductDuplicate(dt, productName))
+        {
+            // Product name is a duplicate, throw an error or handle it as needed
+            // For example, you can display a message to the user
+            lblErrorMessage.ForeColor = System.Drawing.Color.DarkRed;
+            lblErrorMessage.Font.Size = FontUnit.Point(16);
+            lblErrorMessage.Text = "Product already exists. Please enter another product or modify the existing product.";
+            return;
+        }
+
+        // Clear any previous error message
+        lblErrorMessage.Text = string.Empty;
+
         // Add a new row
         DataRow newRow = dt.NewRow();
         newRow["product_name"] = txtProductName.Text;
-        newRow["product_rate"] = txtProductRate.Text;
         newRow["product_quantity"] = txtProductQuantity.Text;
+        newRow["product_rate"] = txtProductRate.Text;
         newRow["product_discount"] = txtProductDiscount.Text;
         newRow["product_tax"] = txtProductTax.Text;
         newRow["product_amount"] = txtAmount.Text;
@@ -94,8 +148,8 @@ public partial class InvoiceAdd : System.Web.UI.Page
 
         // Clear the textboxes for new input
         txtProductName.Text = string.Empty;
-        txtProductRate.Text = string.Empty;
         txtProductQuantity.Text = string.Empty;
+        txtProductRate.Text = string.Empty;
         txtProductDiscount.Text = string.Empty;
         txtProductTax.Text = string.Empty;
         txtAmount.Text = string.Empty;
@@ -104,24 +158,29 @@ public partial class InvoiceAdd : System.Web.UI.Page
         ClientScript.RegisterStartupScript(this.GetType(), "calculateGrandTotal", "calculateGrandTotal();", true);
     }
 
+    private bool IsProductDuplicate(DataTable dt, string productName)
+    {
+        foreach (DataRow row in dt.Rows)
+        {
+            if (row["product_name"].ToString().Equals(productName, StringComparison.OrdinalIgnoreCase))
+            {
+                return true; // Product name already exists
+            }
+        }
+        return false; // Product name is not a duplicate
+    }
+
     protected DataTable GetProductDataTable()
     {
         DataTable dt = new DataTable();
         dt.Columns.Add("product_name");
-        dt.Columns.Add("product_rate");
         dt.Columns.Add("product_quantity");
+        dt.Columns.Add("product_rate");
         dt.Columns.Add("product_discount");
         dt.Columns.Add("product_tax");
         dt.Columns.Add("product_amount");
 
         return dt;
-    }
-
-    protected void gridViewProducts_RowEditing(object sender, GridViewEditEventArgs e)
-    {
-        // Set the GridView's EditIndex to enable editing mode for the selected row
-        gridViewProducts.EditIndex = e.NewEditIndex;
-        BindGridViewProducts();
     }
 
     protected void gridViewProducts_RowDataBound(object sender, GridViewRowEventArgs e)
@@ -259,8 +318,8 @@ public partial class InvoiceAdd : System.Web.UI.Page
 
     private decimal CalculateAmount(object rate, object quantity, object discount, object tax)
     {
-        decimal rateValue = Convert.ToDecimal(rate);
         decimal quantityValue = Convert.ToDecimal(quantity);
+        decimal rateValue = Convert.ToDecimal(rate);
         decimal discountValue = Convert.ToDecimal(discount);
         decimal taxValue = Convert.ToDecimal(tax);
 
@@ -295,6 +354,35 @@ public partial class InvoiceAdd : System.Web.UI.Page
             lblMsg.ForeColor = System.Drawing.Color.DarkRed;
             lblMsg.Font.Size = FontUnit.Point(16);
             lblMsg.Text = result.Rows[0]["exec_msg"].ToString();
+        }
+    }
+
+    protected void btnUpdate_Click(object sender, EventArgs e)
+    {
+        // Access the DataTable from ViewState
+        DataTable dt = ViewState["ProductData"] as DataTable;
+
+        if (dt != null)
+        {
+            // Find the row to modify based on a unique identifier (e.g., product_name)
+            DataRow rowToModify = dt.AsEnumerable()
+                .SingleOrDefault(row => string.Equals(row.Field<string>("product_name"), product_name.Text, StringComparison.OrdinalIgnoreCase));
+
+            if (rowToModify != null)
+            {
+                // Update the values in the existing row
+                rowToModify["product_quantity"] = product_quantity.Text;
+                rowToModify["product_rate"] = product_rate.Text;
+                rowToModify["product_discount"] = product_discount.Text;
+                rowToModify["product_tax"] = product_tax.Text;
+                rowToModify["product_amount"] = product_amount.Text;
+
+                gridViewProducts.DataSource = dt;
+                gridViewProducts.DataBind();
+            }
+
+            // Close the modal (if necessary)
+            ScriptManager.RegisterStartupScript(this, this.GetType(), "HideModalScript", "$('#myModal').modal('hide');", true);
         }
     }
 }
